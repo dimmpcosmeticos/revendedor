@@ -1,0 +1,2 @@
+# revendedor
+App DIMMP Cosméticos
