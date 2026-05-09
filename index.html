@@ -245,6 +245,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div style="margin-top:8px">
       <button class="btn p" onclick="startOrderForClient()">🛒 Novo pedido</button>
     </div>
+    <div style="margin-top:8px">
+      <input type="file" id="photoInputDetail" accept="image/*" capture="environment" style="display:none" onchange="updateClientPhoto(this)">
+      <button class="btn" onclick="document.getElementById('photoInputDetail').click()">📸 Adicionar / Trocar foto</button>
+    </div>
     <div id="clientEditBtns" style="display:none">
       <button class="btn rd" onclick="deleteClient()">🗑️ Excluir cliente</button>
     </div>
@@ -977,6 +981,23 @@ function sendWhatsApp(){
     });
   });
 }
+
+function updateClientPhoto(input){{
+  const file=input.files[0];if(!file||!curCli)return;
+  const reader=new FileReader();
+  reader.onload=e=>{{
+    const dataURL=e.target.result;
+    const ref=storage.ref('clientes/'+curCli.id+'.jpg');
+    ref.putString(dataURL,'data_url').then(()=>ref.getDownloadURL()).then(url=>{{
+      db.ref('clients/'+curCli.id+'/photoURL').set(url).then(()=>{{
+        document.getElementById('clientPhotoImg').src=url;
+        document.getElementById('clientPhoto').style.display='block';
+        alert('Foto atualizada!');
+      }});
+    }}).catch(()=>alert('Erro ao salvar foto. Tente novamente.'));
+  }};
+  reader.readAsDataURL(file);
+}}
 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js');});}
 </script>
