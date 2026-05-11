@@ -218,7 +218,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
   <div class="screen" id="screen-newClient">
     <div class="st">Dados do cliente</div>
     <div class="card">
-      <label>Nome / Razão social *</label><input type="text" id="nc-nome" placeholder="Ex: Barbearia Premium">
+      <label>Pessoa *</label>
+      <div style="display:flex;gap:12px;margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:4px;font-weight:400"><input type="radio" name="nc-pessoa" id="nc-pj" value="Jurídica" checked> Jurídica (CNPJ)</label>
+        <label style="display:flex;align-items:center;gap:4px;font-weight:400"><input type="radio" name="nc-pessoa" id="nc-pf" value="Física"> Física (CPF)</label>
+      </div>
+      <label>Nome Fantasia *</label><input type="text" id="nc-nome" placeholder="Ex: Barbearia Premium">
+      <label>Razão Social</label><input type="text" id="nc-razao" placeholder="Ex: João Silva LTDA">
       <label>CNPJ ou CPF *</label><input type="text" id="nc-doc" placeholder="00.000.000/0001-00">
       <label>Responsável</label><input type="text" id="nc-resp" placeholder="Nome do proprietário">
       <label>WhatsApp *</label><input type="tel" id="nc-tel" placeholder="(17) 9 9999-9999">
@@ -230,9 +236,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
           <option value="atacado">Varejo / Barbearia</option>
           <option value="varejo">Consumidor Final</option>
         </select></div>
-        <div><label>Cidade *</label><input type="text" id="nc-cidade" placeholder="Jales-SP"></div>
+        <div><label>Cidade *</label><input type="text" id="nc-cidade" placeholder="Jales"></div>
       </div>
-      <label>Endereço</label><input type="text" id="nc-end" placeholder="Rua, número, bairro">
+      <div class="r2">
+        <div><label>Estado</label><input type="text" id="nc-estado" placeholder="SP" maxlength="2"></div>
+        <div><label>Bairro</label><input type="text" id="nc-bairro" placeholder="Centro"></div>
+      </div>
+      <div class="r2">
+        <div style="flex:2"><label>Endereço</label><input type="text" id="nc-end" placeholder="Rua Carlos Magalhães"></div>
+        <div><label>Número</label><input type="text" id="nc-num" placeholder="401"></div>
+      </div>
       <label>Observações</label><textarea rows="2" id="nc-obs" placeholder="Preferências, melhor horário..."></textarea>
     </div>
     <div class="card" style="padding:10px 14px">
@@ -248,6 +261,43 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
       <img id="photoPreview" class="photo-preview" style="display:none">
     </div>
     <button class="btn p" onclick="saveClient()">✓ Salvar cliente</button>
+  </div>
+
+  <!-- EDITAR CLIENTE -->
+  <div class="screen" id="screen-editClient">
+    <div class="st">Editar cliente</div>
+    <div class="card">
+      <label>Pessoa *</label>
+      <div style="display:flex;gap:12px;margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:4px;font-weight:400"><input type="radio" name="ec-pessoa" id="ec-pj" value="Jurídica" checked> Jurídica (CNPJ)</label>
+        <label style="display:flex;align-items:center;gap:4px;font-weight:400"><input type="radio" name="ec-pessoa" id="ec-pf" value="Física"> Física (CPF)</label>
+      </div>
+      <label>Nome Fantasia *</label><input type="text" id="ec-nome">
+      <label>Razão Social</label><input type="text" id="ec-razao">
+      <label>CNPJ ou CPF *</label><input type="text" id="ec-doc">
+      <label>Responsável</label><input type="text" id="ec-resp">
+      <label>WhatsApp *</label><input type="tel" id="ec-tel">
+      <label>E-mail</label><input type="email" id="ec-email">
+      <div class="r2">
+        <div><label>Tabela *</label>
+        <select id="ec-tipo-edit">
+          <option value="distribuidor">Distribuidor</option>
+          <option value="atacado">Varejo / Barbearia</option>
+          <option value="varejo">Consumidor Final</option>
+        </select></div>
+        <div><label>Cidade</label><input type="text" id="ec-cidade"></div>
+      </div>
+      <div class="r2">
+        <div><label>Estado</label><input type="text" id="ec-estado" maxlength="2"></div>
+        <div><label>Bairro</label><input type="text" id="ec-bairro"></div>
+      </div>
+      <div class="r2">
+        <div style="flex:2"><label>Endereço</label><input type="text" id="ec-end"></div>
+        <div><label>Número</label><input type="text" id="ec-num"></div>
+      </div>
+      <label>Observações</label><textarea rows="2" id="ec-obs"></textarea>
+    </div>
+    <button class="btn p" onclick="saveEditClient()">✓ Salvar alterações</button>
   </div>
 
   <!-- DETALHE CLIENTE -->
@@ -267,6 +317,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div style="margin-top:8px">
       <input type="file" id="photoInputDetail" accept="image/*" capture="environment" style="display:none" onchange="updateClientPhoto(this)">
       <button class="btn" onclick="document.getElementById('photoInputDetail').click()">📸 Adicionar / Trocar foto</button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn" onclick="editClient()">✏️ Editar cliente</button>
     </div>
     <div id="clientEditBtns" style="display:none">
       <button class="btn rd" onclick="deleteClient()">🗑️ Excluir cliente</button>
@@ -309,6 +362,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
       <button class="pb" onclick="setPgto(this,'Boleto 14d')">📄 14d</button>
       <button class="pb" onclick="setPgto(this,'Boleto 15d')">📄 15d</button>
       <button class="pb" onclick="setPgto(this,'Boleto 21d')">📄 21d</button>
+      <button class="pb" onclick="setPgto(this,'Boleto 28d')">📄 28d</button>
       <button class="pb" onclick="setPgto(this,'Boleto 30d')">📄 30d</button>
       <button class="pb" onclick="setPgto(this,'Cartão Crédito')">💳 Crédito</button>
       <button class="pb" onclick="setPgto(this,'Cartão Débito')">💳 Débito</button>
@@ -384,6 +438,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div class="st">Todos os pedidos</div>
     <button class="btn" onclick="exportAllCSV()">⬇️ Exportar tudo em CSV</button>
     <div id="adminOrderList"><div class="loading">Carregando...</div></div>
+    <div class="st" style="margin-top:16px">📍 Localização Revendedores</div>
+    <button class="btn" onclick="renderTracking()" style="margin-bottom:8px">🔄 Atualizar localização</button>
+    <div id="trackingList"><p style="font-size:13px;color:var(--muted)">Clique em atualizar para ver.</p></div>
   </div>
 
   <!-- ESTOQUE -->
@@ -416,14 +473,9 @@ const db=firebase.database();
 const storage=firebase.storage();
 
 const PRODS=[
-  {id:"256",cat:"Pó Descolorante",name:"Pó Descolorante MVN Branco",e:"🪄",dist:25.90,atac:33.90,var:33.90},
-  {id:"258",cat:"Pó Descolorante",name:"Pó Descolorante Koncentre MVN Branco",e:"🪄",dist:25.90,atac:33.90,var:33.90},
   {id:"263",cat:"Pó Descolorante",name:"Pó Descolorante Koncentre MVN Azul",e:"🪄",dist:25.90,atac:33.90,var:33.90},
   {id:"265a",cat:"Pó Descolorante",name:"Pó Descolorante White New Acabado",e:"🪄",dist:25.90,atac:33.90,var:40.00},
   {id:"265b",cat:"Pó Descolorante",name:"Pó Descolorante White New",e:"🪄",dist:25.90,atac:33.90,var:33.90},
-  {id:"486",cat:"Pó Descolorante",name:"Soren Pó Descolorante White Blond",e:"🪄",dist:25.90,atac:33.90,var:33.90},
-  {id:"487",cat:"Pó Descolorante",name:"Soren Pó Descolorante Blue Blond",e:"🪄",dist:25.90,atac:33.90,var:33.90},
-  {id:"K002",cat:"Pó Descolorante",name:"Pó Descolorante Azul",e:"🪄",dist:25.90,atac:33.90,var:33.90},
   {id:"418",cat:"Dom Mustache",name:"Dom Mustache Shave para Barbear Gel Cristal 1L",e:"img",img:"data:image/png;base64,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",dist:32.00,atac:41.90,var:80.00},
   {id:"KC004",cat:"Dom Mustache",name:"Dom Mustache Shave para Barbear 200ml",e:"img",img:"data:image/png;base64,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",dist:16.00,atac:20.90,var:35.90},
   {id:"417",cat:"Dom Mustache",name:"Dom Mustache Balm para Barba Hidratante Facial 1L",e:"img",img:"data:image/png;base64,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",dist:40.00,atac:51.90,var:95.00},
@@ -445,15 +497,6 @@ const PRODS=[
   {id:"KBE001",cat:"Blend Essencial",name:"Blend Essencial do Sono",e:"😴",dist:24.90,atac:32.50,var:49.90},
   {id:"KBE002",cat:"Blend Essencial",name:"Blend Essencial Rejuvenescedor",e:"✨",dist:24.90,atac:32.50,var:49.90},
   {id:"KBE003",cat:"Blend Essencial",name:"Blend Essencial Foco",e:"🎯",dist:24.90,atac:32.50,var:49.90},
-  {id:"KOV001",cat:"Óleos Vegetais",name:"Óleo Vegetal Rosa Mosqueta 30ml",e:"🌹",dist:14.00,atac:18.50,var:29.00},
-  {id:"KOV002",cat:"Óleos Vegetais",name:"Óleo Vegetal Abacate 30ml",e:"🥑",dist:14.00,atac:18.50,var:29.00},
-  {id:"KOV003",cat:"Óleos Vegetais",name:"Óleo Vegetal Semente de Uva 30ml",e:"🍇",dist:14.00,atac:18.50,var:29.00},
-  {id:"KOV004",cat:"Óleos Vegetais",name:"Óleo Vegetal Pracaxi 30ml",e:"🌿",dist:14.00,atac:18.50,var:29.00},
-  {id:"KOV005",cat:"Óleos Vegetais",name:"Óleo Vegetal Patauá 30ml",e:"🌿",dist:14.00,atac:18.50,var:29.00},
-  {id:"KOV006",cat:"Óleos Vegetais",name:"Óleo Vegetal Graviola 30ml",e:"🍈",dist:14.00,atac:18.50,var:29.00},
-  {id:"408",cat:"Dermo Faces",name:"Sérum Niacinamida 10% 30ml",e:"💊",dist:12.50,atac:16.50,var:28.90},
-  {id:"413",cat:"Dermo Faces",name:"Sérum AHAs 10% 30ml",e:"💊",dist:12.50,atac:16.50,var:28.90},
-  {id:"414",cat:"Dermo Faces",name:"Sérum Hialurônico 5% 30ml",e:"💊",dist:12.50,atac:16.50,var:28.90},
   {id:"KSH002",cat:"Shampoo & Condicionador",name:"Shampoo Fortalecedor Oil Series 250ml",e:"🧴",dist:14.90,atac:19.90,var:34.90},
   {id:"KSH003",cat:"Shampoo & Condicionador",name:"Shampoo Cacheados Oil Series 250ml",e:"🧴",dist:14.90,atac:19.90,var:34.90},
   {id:"KSH004",cat:"Shampoo & Condicionador",name:"Shampoo Antioleosidade Oil Series 250ml",e:"🧴",dist:14.90,atac:19.90,var:34.90},
@@ -522,6 +565,8 @@ function doLogin(role){
   document.getElementById('topRole').textContent=role==='admin'?'👑 Sócio':'Revendedor';
   if(role==='admin') document.getElementById('tab-admin').style.display='';
   initDB();tryGPS();renderCatalog();
+  // Rastreamento revendedor
+  if(role!=='admin') initTracking();
 }
 
 function initDB(){
@@ -653,11 +698,13 @@ function openClient(id){
         <div class="drow"><span class="dl">CNPJ/CPF</span><span>${c.doc}</span></div>
         <div class="drow"><span class="dl">WhatsApp</span><span>${c.tel}</span></div>
         ${c.email?`<div class="drow"><span class="dl">E-mail</span><span>${c.email}</span></div>`:''}
-        <div class="drow"><span class="dl">Cidade</span><span>${c.cidade||''}</span></div>
-        ${c.end?`<div class="drow"><span class="dl">Endereço</span><span style="font-size:12px">${c.end}</span></div>`:''}
+        <div class="drow"><span class="dl">Cidade</span><span>${c.cidade||''}${c.estado?' - '+c.estado:''}</span></div>
+        ${c.bairro?`<div class="drow"><span class="dl">Bairro</span><span>${c.bairro}</span></div>`:''}
+        ${c.razao?`<div class="drow"><span class="dl">Razão Social</span><span style="font-size:12px">${c.razao}</span></div>`:''}
+        ${c.end?`<div class="drow"><span class="dl">Endereço</span><span style="font-size:12px">${c.end}${c.num?' nº '+c.num:''}</span></div>`:''}
         <div class="drow"><span class="dl">GPS</span><span style="font-size:11px;color:var(--muted)">${c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4)+(c.cidade_gps?' · '+c.cidade_gps:''):'—'}</span></div>
         ${c.obs?`<div class="drow"><span class="dl">Obs</span><span style="font-size:12px">${c.obs}</span></div>`:''}
-        <div class="drow"><span class="dl">Cadastrado por</span><span>${c.revendedor||'—'}</span></div>
+        <div class="drow"><span class="dl">Cadastrado por</span><span>${c.revendedor||'—'}${c.criadoEm?' · '+c.criadoEm:''}</span></div>
       </div>`;
     // Photo
     const photoDiv=document.getElementById('clientPhoto');
@@ -677,7 +724,53 @@ function openClient(id){
 
 function startOrderForClient(){if(!curCli)return;selCli=curCli.id;ordTable=curCli.tipo;nav('newOrder');}
 function callClient(){if(curCli)window.location.href='tel:'+curCli.tel.replace(/\D/g,'');}
-function deleteClient(){
+function editClient(){
+  if(!curCli)return;
+  const c=curCli;
+  // Preenche campos do formulário de edição
+  document.getElementById('ec-nome').value=c.nome||'';
+  document.getElementById('ec-razao').value=c.razao||'';
+  document.getElementById('ec-doc').value=c.doc||'';
+  document.getElementById('ec-resp').value=c.resp||'';
+  document.getElementById('ec-tel').value=c.tel||'';
+  document.getElementById('ec-email').value=c.email||'';
+  document.getElementById('ec-cidade').value=c.cidade||'';
+  document.getElementById('ec-estado').value=c.estado||'';
+  document.getElementById('ec-bairro').value=c.bairro||'';
+  document.getElementById('ec-end').value=c.end||'';
+  document.getElementById('ec-num').value=c.num||'';
+  document.getElementById('ec-obs').value=c.obs||'';
+  const pf=document.getElementById('ec-pf');
+  const pj=document.getElementById('ec-pj');
+  if(c.pessoa==='Física'){if(pf)pf.checked=true;}else{if(pj)pj.checked=true;}
+  nav('editClient');
+}
+function saveEditClient(){
+  if(!curCli)return;
+  const pessoa=document.querySelector('input[name="ec-pessoa"]:checked')?.value||'Jurídica';
+  const updates={
+    nome:document.getElementById('ec-nome').value.trim(),
+    razao:document.getElementById('ec-razao').value,
+    doc:document.getElementById('ec-doc').value.trim(),
+    resp:document.getElementById('ec-resp').value,
+    tel:document.getElementById('ec-tel').value,
+    email:document.getElementById('ec-email').value,
+    tipo:document.getElementById('ec-tipo-edit').value,
+    cidade:document.getElementById('ec-cidade').value,
+    estado:document.getElementById('ec-estado').value,
+    bairro:document.getElementById('ec-bairro').value,
+    end:document.getElementById('ec-end').value,
+    num:document.getElementById('ec-num').value,
+    obs:document.getElementById('ec-obs').value,
+    pessoa
+  };
+  if(!updates.nome||!updates.doc){alert('Preencha nome e CNPJ/CPF.');return;}
+  db.ref('clients/'+curCli.id).update(updates).then(function(){
+    Object.assign(curCli,updates);
+    nav('clientDetail');
+    openClient(curCli.id);
+  });
+}
   if(CR!=='admin'||!curCli)return;
   if(!confirm('Excluir cliente '+curCli.nome+'?'))return;
   db.ref('clients/'+curCli.id).remove().then(()=>nav('clients'));
@@ -687,20 +780,25 @@ function saveClient(){
   const nome=document.getElementById('nc-nome').value.trim();
   const doc=document.getElementById('nc-doc').value.trim();
   if(!nome||!doc){alert('Preencha nome e CNPJ/CPF.');return;}
+  const pessoa=document.querySelector('input[name="nc-pessoa"]:checked')?.value||'Jurídica';
   const id='c_'+ts();
-  const clientData={id,nome,doc,
+  const clientData={id,nome,doc,pessoa,
+    razao:document.getElementById('nc-razao').value,
     resp:document.getElementById('nc-resp').value,
     tel:document.getElementById('nc-tel').value,
     email:document.getElementById('nc-email').value,
     tipo:document.getElementById('nc-tipo').value,
     cidade:document.getElementById('nc-cidade').value,
+    estado:document.getElementById('nc-estado').value,
+    bairro:document.getElementById('nc-bairro').value,
     end:document.getElementById('nc-end').value,
+    num:document.getElementById('nc-num').value,
     obs:document.getElementById('nc-obs').value,
     lat:gpsLat,lng:gpsLng,cidade_gps:gpsCity,revendedor:CU,criadoEm:today()
   };
   const saveAndGo=()=>{
     db.ref('clients/'+id).set(clientData).then(()=>{
-      ['nc-nome','nc-doc','nc-resp','nc-tel','nc-email','nc-cidade','nc-end','nc-obs'].forEach(i=>document.getElementById(i).value='');
+      ['nc-nome','nc-razao','nc-doc','nc-resp','nc-tel','nc-email','nc-cidade','nc-estado','nc-bairro','nc-end','nc-num','nc-obs'].forEach(i=>document.getElementById(i).value='');
       photoDataURL=null;
       nav('clients');
     });
@@ -824,17 +922,20 @@ function finalizeOrder(){
   const d=Math.min(40,parseFloat(document.getElementById('discountInput').value)||0);
   let sub=0;items.forEach(it=>{sub+=it.qty*it.price;});
   const total=Math.round((sub*(1-d/100))*100)/100;
-  const id='o_'+ts();
-  // Atualiza estoque
+  // Número sequencial
   const updates={};
   items.forEach(it=>{
     const cur=getEstoque(it.id);
     if(cur!==999)updates['estoque/'+it.id]=Math.max(0,cur-it.qty);
   });
-  updates['orders/'+id]={id,clientId:selCli,clientNome:clients[selCli]?.nome||'',
-    date:today(),ts:ts(),table:ordTable,items,discount:d,pgto:selPgto,
-    obs:document.getElementById('orderObs').value,total,revendedor:CU};
-  db.ref().update(updates).then(()=>{selCli=null;openOrder(id);});
+  db.ref('orderCounter').transaction(function(cur){return(cur||0)+1;}).then(function(res){
+    const num=res.snapshot.val();
+    const id='p'+String(num).padStart(4,'0');
+    updates['orders/'+id]={id,num,clientId:selCli,clientNome:clients[selCli]?.nome||'',
+      date:today(),ts:ts(),table:ordTable,items,discount:d,pgto:selPgto,
+      obs:document.getElementById('orderObs').value,total,revendedor:CU,status:'confirmado'};
+    db.ref().update(updates).then(function(){selCli=null;openOrder(id);});
+  });
 }
 
 // ORDER DETAIL
@@ -871,16 +972,49 @@ function openOrder(id){
 }
 
 function buildReport(o,c,sub,dAmt){
-  const L=['=== PEDIDO DIMMP COSMÉTICOS ===','Nº: '+o.id,'Data: '+o.date,'Revendedor: '+o.revendedor,'','--- CLIENTE ---'];
-  if(c){L.push('Nome: '+c.nome,'CNPJ/CPF: '+c.doc,'Tel: '+c.tel,'Cidade: '+(c.cidade||''),'GPS: '+(c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4):'—'));}
+  const numPed=o.num?'P'+String(o.num).padStart(4,'0'):o.id;
+  const L=['=== PEDIDO DIMMP COSMÉTICOS ===','Nº: '+numPed,'Data: '+o.date,'Revendedor: '+o.revendedor,'','--- CLIENTE ---'];
+  if(c){L.push('Nome: '+c.nome,'CNPJ/CPF: '+c.doc,'Tel: '+c.tel,'Cidade: '+(c.cidade||'')+(c.estado?' - '+c.estado:''),'GPS: '+(c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4)+(c.cidade_gps?' · '+c.cidade_gps:''):'—'));}
   L.push('Tabela: '+(TBL[o.table]||o.table).toUpperCase(),'','--- PRODUTOS ---');
   (o.items||[]).forEach(it=>L.push(it.name.substring(0,28).padEnd(28)+' x'+it.qty+'  '+fmt(it.qty*it.price)));
   L.push('','Subtotal: '+fmt(sub));
   if(o.discount>0)L.push('Desconto: -'+fmt(dAmt)+' ('+o.discount+'%)');
   L.push('TOTAL: '+fmt(o.total),'Pagamento: '+o.pgto);
-  if(o.pgto==='PIX')L.push('Chave PIX: CNPJ 43.287.807/0001-60');
+  if(o.pgto==='PIX')L.push('Chave PIX: CNPJ 43.287.807/0001-60 ou financeiro@dimmpcosmeticos.com.br');
   if(o.obs)L.push('Obs: '+o.obs);
   L.push('================================');
+  // Seção Munin
+  L.push('','=== RELATÓRIO PARA O MUNIN ===');
+  L.push('-- PARTICIPANTE (Novo Cliente) --');
+  if(c){
+    L.push('Perfil: Cliente');
+    L.push('Pessoa: '+(c.pessoa||'Jurídica'));
+    L.push('Nome Fantasia: '+(c.nome||''));
+    L.push('Nome/Razão Social: '+(c.razao||c.nome||''));
+    L.push('CPF/CNPJ: '+(c.doc||''));
+    L.push('(ddd)Celular: '+(c.tel||''));
+    L.push('E-mail: '+(c.email||''));
+    L.push('Endereço: '+(c.end||'')+' '+(c.num||''));
+    L.push('Bairro: '+(c.bairro||''));
+    L.push('Município: '+(c.cidade||''));
+    L.push('Estado: '+(c.estado||'SP'));
+  }
+  L.push('','-- PEDIDO (Manutenção) --');
+  L.push('Cliente: '+(c?c.nome:''));
+  L.push('Tabela: '+(TBL[o.table]||o.table).toUpperCase());
+  L.push('Cond.Pagto: '+o.pgto);
+  L.push('');
+  L.push('Qtde  Descrição                          Vlr.Unit  Vlr.Total');
+  L.push('--------------------------------------------------------------');
+  (o.items||[]).forEach(it=>{
+    const desc=it.name.substring(0,35).padEnd(35);
+    const vu=fmt(it.price).padStart(8);
+    const vt=fmt(it.qty*it.price).padStart(9);
+    L.push(String(it.qty).padStart(4)+'  '+desc+'  '+vu+'  '+vt);
+  });
+  L.push('--------------------------------------------------------------');
+  L.push('TOTAL: '+fmt(o.total));
+  if(o.obs)L.push('Obs: '+o.obs);
   document.getElementById('reportBox').textContent=L.join('\n');
 }
 
@@ -1059,6 +1193,56 @@ function cpPix(k){
 }
 function waPix(k){
   window.open('https://wa.me/?text='+encodeURIComponent('Chave PIX DIMMP Cosméticos: '+k),'_blank');
+}
+// RASTREAMENTO REVENDEDOR
+var trackInterval=null;
+function dentroHorario(){const h=new Date().getHours();return h>=8&&h<18;}
+function registraLocalizacao(){
+  if(!dentroHorario())return;
+  if(!navigator.geolocation)return;
+  navigator.geolocation.getCurrentPosition(function(p){
+    getCidade(p.coords.latitude,p.coords.longitude,function(cidade){
+      const reg={revendedor:CU,lat:p.coords.latitude,lng:p.coords.longitude,cidade:cidade,ts:Date.now(),data:today()};
+      db.ref('tracking/'+CU+'/'+Date.now()).set(reg);
+      // Limpa registros com mais de 30 dias
+      const limite=Date.now()-(30*24*60*60*1000);
+      db.ref('tracking/'+CU).orderByKey().endAt(String(limite)).once('value',function(s){
+        s.forEach(function(c){c.ref.remove();});
+      });
+    });
+  });
+}
+function initTracking(){
+  registraLocalizacao();
+  if(trackInterval)clearInterval(trackInterval);
+  trackInterval=setInterval(function(){
+    if(dentroHorario())registraLocalizacao();
+  },2*60*60*1000);
+}
+function renderTracking(){
+  const el=document.getElementById('trackingList');if(!el)return;
+  el.innerHTML='<p style="font-size:12px;color:var(--muted)">Carregando...</p>';
+  db.ref('tracking').once('value',function(snap){
+    const all=snap.val()||{};
+    let html='';
+    Object.keys(all).forEach(function(rev){
+      const registros=all[rev];
+      const keys=Object.keys(registros).sort().reverse();
+      html+='<div class="st">📍 '+rev+'</div><div class="card" style="padding:4px 14px">';
+      keys.slice(0,20).forEach(function(k){
+        const r=registros[k];
+        const dt=new Date(parseInt(k));
+        const hora=dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
+        const maps='https://maps.google.com/?q='+r.lat+','+r.lng;
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0ece0">';
+        html+='<div><div style="font-size:12px;font-weight:600">'+(r.cidade||'—')+'</div><div style="font-size:11px;color:var(--muted)">'+r.data+' · '+hora+'</div></div>';
+        html+='<a href="'+maps+'" target="_blank" style="background:var(--blue);color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;text-decoration:none">🗺️ Maps</a>';
+        html+='</div>';
+      });
+      html+='</div>';
+    });
+    el.innerHTML=html||'<p style="font-size:13px;color:var(--muted)">Nenhum registro ainda.</p>';
+  });
 }
 function updateClientPhoto(input){{
   const file=input.files[0];if(!file||!curCli)return;
