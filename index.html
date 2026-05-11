@@ -181,21 +181,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
       <div class="mc"><div class="lb">Ticket médio</div><div class="vl a" id="mTkt">R$ 0,00</div></div>
     </div>
     <div id="commHomeBox" style="display:none"></div>
-    <div class="pix" style="flex-direction:column;align-items:flex-start;gap:8px">
+    <div class="pix" style="flex-direction:column;align-items:flex-start;gap:6px">
       <div style="font-size:11px;font-weight:700">💚 PIX DIMMP Cosméticos</div>
       <div style="width:100%">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
           <div><div style="font-size:10px;opacity:.7">CNPJ</div><div style="font-size:12px;font-weight:700">43.287.807/0001-60</div></div>
           <div style="display:flex;gap:4px">
-            <button onclick="cpPix('43.287.807/0001-60')" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">📋</button>
-            <button onclick="waPix('43.287.807/0001-60')" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">💬</button>
+            <button onclick="cpPix('43.287.807/0001-60')" style="background:rgba(8,80,65,.2);border:none;color:var(--gd);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">📋 Copiar</button>
+            <button onclick="waPix('43.287.807/0001-60')" style="background:rgba(8,80,65,.2);border:none;color:var(--gd);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">💬 WA</button>
           </div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div><div style="font-size:10px;opacity:.7">E-mail</div><div style="font-size:11px;font-weight:700">financeiro@dimmpcosmeticos.com.br</div></div>
           <div style="display:flex;gap:4px">
-            <button onclick="cpPix('financeiro@dimmpcosmeticos.com.br')" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">📋</button>
-            <button onclick="waPix('financeiro@dimmpcosmeticos.com.br')" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">💬</button>
+            <button onclick="cpPix('financeiro@dimmpcosmeticos.com.br')" style="background:rgba(8,80,65,.2);border:none;color:var(--gd);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">📋 Copiar</button>
+            <button onclick="waPix('financeiro@dimmpcosmeticos.com.br')" style="background:rgba(8,80,65,.2);border:none;color:var(--gd);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">💬 WA</button>
           </div>
         </div>
       </div>
@@ -313,7 +313,25 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
       <button class="pb" onclick="setPgto(this,'Cartão Crédito')">💳 Crédito</button>
       <button class="pb" onclick="setPgto(this,'Cartão Débito')">💳 Débito</button>
     </div>
-    <div id="pixInfo" style="display:none" class="pix">💚 PIX DIMMP: CNPJ 43.287.807/0001-60</div>
+    <div id="pixInfo" style="display:none" class="pix" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div style="font-size:11px;font-weight:700">💚 PIX DIMMP Cosméticos</div>
+      <div style="width:100%">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <div><div style="font-size:10px;opacity:.7">CNPJ</div><div style="font-size:12px;font-weight:700">43.287.807/0001-60</div></div>
+          <div style="display:flex;gap:4px">
+            <button onclick="cpPix('43.287.807/0001-60')" style="background:rgba(8,80,65,.2);border:none;color:var(--gd);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">📋</button>
+            <button onclick="waPix('43.287.807/0001-60')" style="background:rgba(8,80,65,.2);border:none;color:var(--gd);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">💬</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-size:10px;opacity:.7">E-mail</div><div style="font-size:11px;font-weight:700">financeiro@dimmpcosmeticos.com.br</div></div>
+          <div style="display:flex;gap:4px">
+            <button onclick="cpPix('financeiro@dimmpcosmeticos.com.br')" style="background:rgba(8,80,65,.2);border:none;color:var(--gd);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">📋</button>
+            <button onclick="waPix('financeiro@dimmpcosmeticos.com.br')" style="background:rgba(8,80,65,.2);border:none;color:var(--gd);padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">💬</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="card" style="padding:8px 14px">
       <div class="drow"><span class="dl">Subtotal</span><span id="summSub">R$ 0,00</span></div>
       <div class="drow"><span class="dl">Desconto</span><span id="summDisc" style="color:var(--coral)">- R$ 0,00</span></div>
@@ -475,7 +493,7 @@ let CU=null,CR='revendedor',clients={},orders={},estoque={},comissoes={};
 let catTable='distribuidor',ordTable='distribuidor';
 let orderQtys={},selPgto='Dinheiro',selCli=null,curCli=null;
 let navStack=[],curOrderId=null;
-let gpsLat=-20.274,gpsLng=-50.536,gpsCity="";
+let gpsLat=-20.274,gpsLng=-50.536,gpsCity='';
 let photoDataURL=null;
 const ROOT=['home','clients','catalog','orders','admin'];
 
@@ -545,6 +563,7 @@ function tryGPS(){
     var el=document.getElementById('gpsInfo');
     if(el)el.textContent='Lat: '+gpsLat.toFixed(4)+' · Long: '+gpsLng.toFixed(4)+' (aprox.)';
   });}
+  );}
 }
 
 function nav(name,push=true){
@@ -854,7 +873,7 @@ function openOrder(id){
 
 function buildReport(o,c,sub,dAmt){
   const L=['=== PEDIDO DIMMP COSMÉTICOS ===','Nº: '+o.id,'Data: '+o.date,'Revendedor: '+o.revendedor,'','--- CLIENTE ---'];
-  if(c){L.push('Nome: '+c.nome,'CNPJ/CPF: '+c.doc,'Tel: '+c.tel,'Cidade: '+(c.cidade||''),'GPS: '+(c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4)+(c.cidade_gps?' · '+c.cidade_gps:''):'—'));}
+  if(c){L.push('Nome: '+c.nome,'CNPJ/CPF: '+c.doc,'Tel: '+c.tel,'Cidade: '+(c.cidade||''),'GPS: '+(c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4):'—'));}
   L.push('Tabela: '+(TBL[o.table]||o.table).toUpperCase(),'','--- PRODUTOS ---');
   (o.items||[]).forEach(it=>L.push(it.name.substring(0,28).padEnd(28)+' x'+it.qty+'  '+fmt(it.qty*it.price)));
   L.push('','Subtotal: '+fmt(sub));
@@ -879,16 +898,8 @@ function renderOrders(){
 
 function deleteOrder(){
   if(CR!=='admin'||!curOrderId)return;
-  if(!confirm('Cancelar este pedido? O estoque sera devolvido.'))return;
-  db.ref('orders/'+curOrderId).once('value',function(s){
-    var o=s.val();var up={};
-    (o&&o.items||[]).forEach(function(it){
-      var c=estoque[it.id];
-      if(c!==undefined&&c!==999)up['estoque/'+it.id]=c+it.qty;
-    });
-    up['orders/'+curOrderId]=null;
-    db.ref().update(up).then(function(){alert('Pedido cancelado! Estoque devolvido.');nav('orders');});
-  });
+  if(!confirm('Cancelar este pedido?'))return;
+  db.ref('orders/'+curOrderId).remove().then(()=>nav('orders'));
 }
 
 // ESTOQUE ADMIN
@@ -1024,14 +1035,32 @@ function sendWhatsApp(){
       msg+='\nSubtotal: '+fmt(sub);
       if(o.discount>0)msg+='\nDesconto: -'+fmt(sub*o.discount/100)+' ('+o.discount+'%)';
       msg+='\n*Total: '+fmt(o.total)+'*\nPagamento: '+o.pgto;
-      if(o.pgto==='PIX')msg+='\nPIX: CNPJ 43.287.807/0001-60';
+      if(o.pgto==='PIX')msg+='\nPIX: CNPJ 43.287.807/0001-60 ou financeiro@dimmpcosmeticos.com.br';
       if(o.obs)msg+='\nObs: '+o.obs;
-      const tel=c?c.tel.replace(/\D/g,''):'5517999999999';
       window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
     });
   });
 }
 
+function updGPS(){
+  if(!curCli||!navigator.geolocation){alert('GPS indisponível.');return;}
+  navigator.geolocation.getCurrentPosition(function(p){
+    var lat=p.coords.latitude,lng=p.coords.longitude;
+    getCidade(lat,lng,function(cidade){
+      db.ref('clients/'+curCli.id).update({lat:lat,lng:lng,cidade_gps:cidade}).then(function(){
+        curCli.lat=lat;curCli.lng=lng;curCli.cidade_gps=cidade;
+        alert('GPS atualizado!\nLat: '+lat.toFixed(4)+' · Long: '+lng.toFixed(4)+(cidade?'\n'+cidade:''));
+      });
+    });
+  },function(){alert('Não foi possível obter GPS.');});
+}
+function cpPix(k){
+  if(navigator.clipboard){navigator.clipboard.writeText(k).then(function(){alert('Copiado!');});}
+  else{var t=document.createElement('textarea');t.value=k;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('Copiado!');}
+}
+function waPix(k){
+  window.open('https://wa.me/?text='+encodeURIComponent('Chave PIX DIMMP Cosméticos: '+k),'_blank');
+}
 function updateClientPhoto(input){{
   const file=input.files[0];if(!file||!curCli)return;
   const reader=new FileReader();
@@ -1109,25 +1138,6 @@ function generatePDF(){
   });
 }
 
-function cpPix(k){
-  if(navigator.clipboard){navigator.clipboard.writeText(k).then(function(){alert('Copiado!');});}
-  else{var t=document.createElement('textarea');t.value=k;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('Copiado!');}
-}
-function waPix(k){
-  window.open('https://wa.me/?text='+encodeURIComponent(k),'_blank');
-}
-function updGPS(){
-  if(!curCli||!navigator.geolocation){alert('GPS indisponível.');return;}
-  navigator.geolocation.getCurrentPosition(function(p){
-    var lat=p.coords.latitude,lng=p.coords.longitude;
-    getCidade(lat,lng,function(cidade){
-      db.ref('clients/'+curCli.id).update({lat:lat,lng:lng,cidade_gps:cidade}).then(function(){
-        curCli.lat=lat;curCli.lng=lng;curCli.cidade_gps=cidade;
-        alert('GPS atualizado!\nLat: '+lat.toFixed(4)+' · Long: '+lng.toFixed(4)+(cidade?'\n'+cidade:''));
-      });
-    });
-  },function(){alert('Não foi possível obter GPS.');});
-}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js');});}
 </script>
 </body>
