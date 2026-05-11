@@ -181,23 +181,25 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
       <div class="mc"><div class="lb">Ticket médio</div><div class="vl a" id="mTkt">R$ 0,00</div></div>
     </div>
     <div id="commHomeBox" style="display:none"></div>
-    <div class="card" style="padding:10px 14px;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">💚 Chaves PIX DIMMP Cosméticos</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
-        <div><div style="font-size:11px;color:var(--muted)">CNPJ</div><div style="font-size:13px;font-weight:600">43.287.807/0001-60</div></div>
-        <div style="display:flex;gap:6px">
-          <button class="btn" style="padding:5px 10px;font-size:11px;margin:0;width:auto" onclick="cpPix('43.287.807/0001-60')">📋</button>
-          <button class="btn p" style="padding:5px 10px;font-size:11px;margin:0;width:auto" onclick="waPix('CNPJ','43.287.807/0001-60')">💬</button>
+    <div class="pix" style="flex-direction:column;align-items:flex-start;gap:8px">
+      <div style="font-size:11px;font-weight:700">💚 PIX DIMMP Cosméticos</div>
+      <div style="width:100%">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div><div style="font-size:10px;opacity:.7">CNPJ</div><div style="font-size:12px;font-weight:700">43.287.807/0001-60</div></div>
+          <div style="display:flex;gap:4px">
+            <button onclick="cpPix('43.287.807/0001-60')" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">📋</button>
+            <button onclick="waPix('43.287.807/0001-60')" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">💬</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-size:10px;opacity:.7">E-mail</div><div style="font-size:11px;font-weight:700">financeiro@dimmpcosmeticos.com.br</div></div>
+          <div style="display:flex;gap:4px">
+            <button onclick="cpPix('financeiro@dimmpcosmeticos.com.br')" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">📋</button>
+            <button onclick="waPix('financeiro@dimmpcosmeticos.com.br')" style="background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer">💬</button>
+          </div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0">
-        <div><div style="font-size:11px;color:var(--muted)">E-mail</div><div style="font-size:12px;font-weight:600">financeiro@dimmpcosmeticos.com.br</div></div>
-        <div style="display:flex;gap:6px">
-          <button class="btn" style="padding:5px 10px;font-size:11px;margin:0;width:auto" onclick="cpPix('financeiro@dimmpcosmeticos.com.br')">📋</button>
-          <button class="btn p" style="padding:5px 10px;font-size:11px;margin:0;width:auto" onclick="waPix('E-mail','financeiro@dimmpcosmeticos.com.br')">💬</button>
-        </div>
-      </div>
-    </div
+    </div>
     <div class="st">Ação rápida</div>
     <button class="btn p" onclick="nav('newOrder')">＋ Novo pedido</button>
     <button class="btn" onclick="nav('newClient')">👤 Cadastrar cliente</button>
@@ -303,11 +305,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div class="pg" id="pgtoGrid">
       <button class="pb active" onclick="setPgto(this,'Dinheiro')">💵 Dinheiro</button>
       <button class="pb" onclick="setPgto(this,'PIX')">💚 PIX</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 7d')">📄 Boleto 7d</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 14d')">📄 Boleto 14d</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 15d')">📄 Boleto 15d</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 21d')">📄 Boleto 21d</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 30d')">📄 Boleto 30d</button>
+      <button class="pb" onclick="setPgto(this,'Boleto 7d')">📄 7d</button>
+      <button class="pb" onclick="setPgto(this,'Boleto 14d')">📄 14d</button>
+      <button class="pb" onclick="setPgto(this,'Boleto 15d')">📄 15d</button>
+      <button class="pb" onclick="setPgto(this,'Boleto 21d')">📄 21d</button>
+      <button class="pb" onclick="setPgto(this,'Boleto 30d')">📄 30d</button>
       <button class="pb" onclick="setPgto(this,'Cartão Crédito')">💳 Crédito</button>
       <button class="pb" onclick="setPgto(this,'Cartão Débito')">💳 Débito</button>
     </div>
@@ -1111,9 +1113,8 @@ function cpPix(k){
   if(navigator.clipboard){navigator.clipboard.writeText(k).then(function(){alert('Copiado!');});}
   else{var t=document.createElement('textarea');t.value=k;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('Copiado!');}
 }
-function waPix(tipo,k){
-  var m='*PIX DIMMP Cosméticos*\nTipo: '+tipo+'\nChave: '+k+'\n\nUse essa chave para o pagamento.';
-  window.open('https://wa.me/?text='+encodeURIComponent(m),'_blank');
+function waPix(k){
+  window.open('https://wa.me/?text='+encodeURIComponent(k),'_blank');
 }
 function updGPS(){
   if(!curCli||!navigator.geolocation){alert('GPS indisponível.');return;}
