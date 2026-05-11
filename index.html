@@ -181,23 +181,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
       <div class="mc"><div class="lb">Ticket médio</div><div class="vl a" id="mTkt">R$ 0,00</div></div>
     </div>
     <div id="commHomeBox" style="display:none"></div>
-    <div card" style="padding:10px 14px;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">💚 Chaves PIX DIMMP Cosméticos</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
-        <div><div style="font-size:11px;color:var(--muted)">CNPJ</div><div style="font-size:13px;font-weight:600">43.287.807/0001-60</div></div>
-        <div style="display:flex;gap:6px">
-          <button class="btn" style="padding:5px 10px;font-size:11px;margin:0;width:auto" onclick="cpPix('43.287.807/0001-60')">📋</button>
-          <button class="btn p" style="padding:5px 10px;font-size:11px;margin:0;width:auto" onclick="waPix('CNPJ','43.287.807/0001-60')">💬</button>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0">
-        <div><div style="font-size:11px;color:var(--muted)">E-mail</div><div style="font-size:12px;font-weight:600">financeiro@dimmpcosmeticos.com.br</div></div>
-        <div style="display:flex;gap:6px">
-          <button class="btn" style="padding:5px 10px;font-size:11px;margin:0;width:auto" onclick="cpPix('financeiro@dimmpcosmeticos.com.br')">📋</button>
-          <button class="btn p" style="padding:5px 10px;font-size:11px;margin:0;width:auto" onclick="waPix('E-mail','financeiro@dimmpcosmeticos.com.br')">💬</button>
-        </div>
-      </div>
-    </div
+    <div class="pix">💚 <div><div>PIX DIMMP Cosméticos</div><div style="font-weight:400;font-size:11px;margin-top:2px">CNPJ: 47.484.315/0001-05</div></div></div>
     <div class="st">Ação rápida</div>
     <button class="btn p" onclick="nav('newOrder')">＋ Novo pedido</button>
     <button class="btn" onclick="nav('newClient')">👤 Cadastrar cliente</button>
@@ -257,7 +241,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn" style="margin-bottom:0" onclick="callClient()">📞 Ligar</button>
       <button class="btn maps" style="margin-bottom:0" onclick="openMaps()">🗺️ Como chegar</button>
-      <button class="btn" style="margin-bottom:0" onclick="updGPS()">📍 GPS</button>
     </div>
     <div style="margin-top:8px">
       <button class="btn p" onclick="startOrderForClient()">🛒 Novo pedido</button>
@@ -303,15 +286,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div class="pg" id="pgtoGrid">
       <button class="pb active" onclick="setPgto(this,'Dinheiro')">💵 Dinheiro</button>
       <button class="pb" onclick="setPgto(this,'PIX')">💚 PIX</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 7d')">📄 Boleto 7d</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 14d')">📄 Boleto 14d</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 15d')">📄 Boleto 15d</button>
-      <button class="pb" onclick="setPgto(this,'Boleto 21d')">📄 Boleto 21d</button>
       <button class="pb" onclick="setPgto(this,'Boleto 30d')">📄 Boleto 30d</button>
+      <button class="pb" onclick="setPgto(this,'Boleto 28/35d')">📄 28/35d</button>
       <button class="pb" onclick="setPgto(this,'Cartão Crédito')">💳 Crédito</button>
       <button class="pb" onclick="setPgto(this,'Cartão Débito')">💳 Débito</button>
     </div>
-    <div id="pixInfo" style="display:none" class="pix">💚 PIX DIMMP: CNPJ 43.287.807/0001-60</div>
+    <div id="pixInfo" style="display:none" class="pix">💚 PIX DIMMP: CNPJ 47.484.315/0001-05</div>
     <div class="card" style="padding:8px 14px">
       <div class="drow"><span class="dl">Subtotal</span><span id="summSub">R$ 0,00</span></div>
       <div class="drow"><span class="dl">Desconto</span><span id="summDisc" style="color:var(--coral)">- R$ 0,00</span></div>
@@ -473,7 +453,7 @@ let CU=null,CR='revendedor',clients={},orders={},estoque={},comissoes={};
 let catTable='distribuidor',ordTable='distribuidor';
 let orderQtys={},selPgto='Dinheiro',selCli=null,curCli=null;
 let navStack=[],curOrderId=null;
-let gpsLat=-20.274,gpsLng=-50.536,gpsCity="";
+let gpsLat=-20.274,gpsLng=-50.536;
 let photoDataURL=null;
 const ROOT=['home','clients','catalog','orders','admin'];
 
@@ -522,27 +502,12 @@ function initDB(){
   db.ref('comissoes').on('value',s=>{comissoes=s.val()||{};if(CR==='admin')renderAdmin();});
 }
 
-function getCidade(lat,lng,cb){
-  fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&accept-language=pt')
-  .then(function(r){return r.json();}).then(function(d){
-    var a=d.address||{};
-    var c=a.city||a.town||a.village||a.municipality||'';
-    var s=a.state_code||'';
-    cb(c+(s?' - '+s:''));
-  }).catch(function(){cb('');});
-}
 function tryGPS(){
-  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(function(p){
+  if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{
     gpsLat=p.coords.latitude;gpsLng=p.coords.longitude;
-    getCidade(gpsLat,gpsLng,function(cidade){
-      gpsCity=cidade;
-      var t='Lat: '+gpsLat.toFixed(4)+' · Long: '+gpsLng.toFixed(4)+(cidade?' · '+cidade:'');
-      var el=document.getElementById('gpsInfo');if(el)el.textContent=t;
-    });
-  },function(){
-    var el=document.getElementById('gpsInfo');
-    if(el)el.textContent='Lat: '+gpsLat.toFixed(4)+' · Long: '+gpsLng.toFixed(4)+' (aprox.)';
-  });}
+    document.getElementById('gpsInfo').textContent='Lat: '+gpsLat.toFixed(4)+' · Long: '+gpsLng.toFixed(4);
+  },()=>{document.getElementById('gpsInfo').textContent='Lat: '+gpsLat.toFixed(4)+' · Long: '+gpsLng.toFixed(4)+' (aprox.)';}
+  );}
 }
 
 function nav(name,push=true){
@@ -635,7 +600,7 @@ function openClient(id){
         ${c.email?`<div class="drow"><span class="dl">E-mail</span><span>${c.email}</span></div>`:''}
         <div class="drow"><span class="dl">Cidade</span><span>${c.cidade||''}</span></div>
         ${c.end?`<div class="drow"><span class="dl">Endereço</span><span style="font-size:12px">${c.end}</span></div>`:''}
-        <div class="drow"><span class="dl">GPS</span><span style="font-size:11px;color:var(--muted)">${c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4)+(c.cidade_gps?' · '+c.cidade_gps:''):'—'}</span></div>
+        <div class="drow"><span class="dl">GPS</span><span style="font-size:11px;color:var(--muted)">${c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4):'—'}</span></div>
         ${c.obs?`<div class="drow"><span class="dl">Obs</span><span style="font-size:12px">${c.obs}</span></div>`:''}
         <div class="drow"><span class="dl">Cadastrado por</span><span>${c.revendedor||'—'}</span></div>
       </div>`;
@@ -676,7 +641,7 @@ function saveClient(){
     cidade:document.getElementById('nc-cidade').value,
     end:document.getElementById('nc-end').value,
     obs:document.getElementById('nc-obs').value,
-    lat:gpsLat,lng:gpsLng,cidade_gps:gpsCity,revendedor:CU,criadoEm:today()
+    lat:gpsLat,lng:gpsLng,revendedor:CU,criadoEm:today()
   };
   const saveAndGo=()=>{
     db.ref('clients/'+id).set(clientData).then(()=>{
@@ -852,13 +817,13 @@ function openOrder(id){
 
 function buildReport(o,c,sub,dAmt){
   const L=['=== PEDIDO DIMMP COSMÉTICOS ===','Nº: '+o.id,'Data: '+o.date,'Revendedor: '+o.revendedor,'','--- CLIENTE ---'];
-  if(c){L.push('Nome: '+c.nome,'CNPJ/CPF: '+c.doc,'Tel: '+c.tel,'Cidade: '+(c.cidade||''),'GPS: '+(c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4)+(c.cidade_gps?' · '+c.cidade_gps:''):'—'));}
+  if(c){L.push('Nome: '+c.nome,'CNPJ/CPF: '+c.doc,'Tel: '+c.tel,'Cidade: '+(c.cidade||''),'GPS: '+(c.lat?c.lat.toFixed(4)+', '+c.lng.toFixed(4):'—'));}
   L.push('Tabela: '+(TBL[o.table]||o.table).toUpperCase(),'','--- PRODUTOS ---');
   (o.items||[]).forEach(it=>L.push(it.name.substring(0,28).padEnd(28)+' x'+it.qty+'  '+fmt(it.qty*it.price)));
   L.push('','Subtotal: '+fmt(sub));
   if(o.discount>0)L.push('Desconto: -'+fmt(dAmt)+' ('+o.discount+'%)');
   L.push('TOTAL: '+fmt(o.total),'Pagamento: '+o.pgto);
-  if(o.pgto==='PIX')L.push('Chave PIX: CNPJ 43.287.807/0001-60');
+  if(o.pgto==='PIX')L.push('Chave PIX: CNPJ 47.484.315/0001-05');
   if(o.obs)L.push('Obs: '+o.obs);
   L.push('================================');
   document.getElementById('reportBox').textContent=L.join('\n');
@@ -877,16 +842,8 @@ function renderOrders(){
 
 function deleteOrder(){
   if(CR!=='admin'||!curOrderId)return;
-  if(!confirm('Cancelar este pedido? O estoque sera devolvido.'))return;
-  db.ref('orders/'+curOrderId).once('value',function(s){
-    var o=s.val();var up={};
-    (o&&o.items||[]).forEach(function(it){
-      var c=estoque[it.id];
-      if(c!==undefined&&c!==999)up['estoque/'+it.id]=c+it.qty;
-    });
-    up['orders/'+curOrderId]=null;
-    db.ref().update(up).then(function(){alert('Pedido cancelado! Estoque devolvido.');nav('orders');});
-  });
+  if(!confirm('Cancelar este pedido?'))return;
+  db.ref('orders/'+curOrderId).remove().then(()=>nav('orders'));
 }
 
 // ESTOQUE ADMIN
@@ -1022,10 +979,10 @@ function sendWhatsApp(){
       msg+='\nSubtotal: '+fmt(sub);
       if(o.discount>0)msg+='\nDesconto: -'+fmt(sub*o.discount/100)+' ('+o.discount+'%)';
       msg+='\n*Total: '+fmt(o.total)+'*\nPagamento: '+o.pgto;
-      if(o.pgto==='PIX')msg+='\nPIX: CNPJ 43.287.807/0001-60';
+      if(o.pgto==='PIX')msg+='\nPIX: CNPJ 47.484.315/0001-05';
       if(o.obs)msg+='\nObs: '+o.obs;
       const tel=c?c.tel.replace(/\D/g,''):'5517999999999';
-      window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+      window.open('https://wa.me/55'+tel+'?text='+encodeURIComponent(msg),'_blank');
     });
   });
 }
@@ -1069,9 +1026,9 @@ function generatePDF(){
       }
       var cn=c?c.nome:'Avulso';
       var cd=c?'<br><span style="font-size:11px;color:#666">'+c.doc+'</span>'+'<br><span style="font-size:11px;color:#666">'+(c.cidade||'')+'</span>':'';
-      var px=o.pgto==='PIX'?'<p style="background:#E1F5EE;padding:10px;border-radius:8px;color:#085041;font-size:12px;margin-top:8px"><b>PIX: CNPJ 43.287.807/0001-60</b></p>':'';
+      var px=o.pgto==='PIX'?'<p style="background:#E1F5EE;padding:10px;border-radius:8px;color:#085041;font-size:12px;margin-top:8px"><b>PIX: CNPJ 47.484.315/0001-05</b></p>':'';
       var ob=o.obs?'<p style="background:#f4f2eb;padding:10px;border-radius:8px;font-size:11px;color:#666;margin-top:8px"><b>Obs:</b> '+o.obs+'</p>':'';
-      var wt='Pedido DIMMP Cosméticos%0ACliente: '+encodeURIComponent(cn)+'%0AData: '+o.date+'%0ATotal: R$ '+total.toFixed(2).replace('.',',')+'%0APgto: '+encodeURIComponent(o.pgto)+(o.pgto==='PIX'?'%0APIX: CNPJ 43.287.807/0001-60':'');
+      var wt='Pedido DIMMP Cosméticos%0ACliente: '+encodeURIComponent(cn)+'%0AData: '+o.date+'%0ATotal: R$ '+total.toFixed(2).replace('.',',')+'%0APgto: '+encodeURIComponent(o.pgto)+(o.pgto==='PIX'?'%0APIX: CNPJ 47.484.315/0001-05':'');
       var p='<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pedido DIMMP</title>';
       p+='<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;padding:20px;color:#1a1a1a}';
       p+='.btn{display:block;width:100%;padding:12px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;text-align:center;text-decoration:none;color:#fff}';
@@ -1098,7 +1055,7 @@ function generatePDF(){
       p+='<div style="margin-top:20px;padding-top:12px;border-top:1px solid #ddd;text-align:center">';
       p+='<p style="font-size:11px;color:#888">DIMMP Cosméticos · (17) 99622-6282</p>';
       p+='<p style="font-size:10px;color:#888;margin-top:2px">sac@dimmpcosmeticos.com.br · dimmpcosmeticos.com.br</p>';
-      p+='<p style="font-size:10px;color:#888;margin-top:2px">CNPJ: 43.287.807/0001-60</p>';
+      p+='<p style="font-size:10px;color:#888;margin-top:2px">CNPJ: 47.484.315/0001-05</p>';
       p+='</div></div></body></html>';
       var blob=new Blob([p],{type:'text/html;charset=utf-8'});
       var url=URL.createObjectURL(blob);
@@ -1107,26 +1064,6 @@ function generatePDF(){
   });
 }
 
-function cpPix(k){
-  if(navigator.clipboard){navigator.clipboard.writeText(k).then(function(){alert('Copiado!');});}
-  else{var t=document.createElement('textarea');t.value=k;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);alert('Copiado!');}
-}
-function waPix(tipo,k){
-  var m='*PIX DIMMP Cosméticos*\nTipo: '+tipo+'\nChave: '+k+'\n\nUse essa chave para o pagamento.';
-  window.open('https://wa.me/?text='+encodeURIComponent(m),'_blank');
-}
-function updGPS(){
-  if(!curCli||!navigator.geolocation){alert('GPS indisponível.');return;}
-  navigator.geolocation.getCurrentPosition(function(p){
-    var lat=p.coords.latitude,lng=p.coords.longitude;
-    getCidade(lat,lng,function(cidade){
-      db.ref('clients/'+curCli.id).update({lat:lat,lng:lng,cidade_gps:cidade}).then(function(){
-        curCli.lat=lat;curCli.lng=lng;curCli.cidade_gps=cidade;
-        alert('GPS atualizado!\nLat: '+lat.toFixed(4)+' · Long: '+lng.toFixed(4)+(cidade?'\n'+cidade:''));
-      });
-    });
-  },function(){alert('Não foi possível obter GPS.');});
-}
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js');});}
 </script>
 </body>
