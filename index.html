@@ -409,7 +409,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div id="rascunhoBtns" style="display:none;margin-top:8px">
       <button class="btn p" onclick="confirmarPedido()" style="margin-bottom:8px">✅ Confirmar pedido</button>
       <button class="btn" onclick="editarRascunho()" style="margin-bottom:8px">✏️ Editar rascunho</button>
-      <button class="btn am" onclick="sendWhatsAppRasc()">💬 Enviar rascunho por WhatsApp</button>
+      <button class="btn am" onclick="sendWhatsAppRasc()" style="margin-bottom:8px">💬 Enviar rascunho por WhatsApp</button>
+      <button class="btn rd" onclick="cancelarRascunho()">🗑️ Cancelar rascunho</button>
     </div>
     <div id="orderActionBtns" style="display:none">
       <div class="st" style="margin-top:16px">Relatório para o Munin</div>
@@ -1139,6 +1140,14 @@ function editarRascunho(){
     updateTotal();
     curOrderId=null;
     nav('newOrder',true,true);
+  });
+}
+function cancelarRascunho(){
+  if(!curOrderId)return;
+  if(!confirm('Cancelar este rascunho? Ele será excluído.'))return;
+  db.ref('orders/'+curOrderId).remove().then(function(){
+    curOrderId=null;
+    nav('orders');
   });
 }
 function sendWhatsAppRasc(){
