@@ -637,7 +637,7 @@ function tryGPS(){
   });}
 }
 
-function nav(name,push=true){
+function nav(name,push=true,skipInit=false){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -645,7 +645,7 @@ function nav(name,push=true){
   document.getElementById('backBtn').classList.toggle('h',ROOT.includes(name));
   if(ROOT.includes(name))navStack=[];
   else if(push)navStack.push(name);
-  if(name==='newOrder')initOrder();
+  if(name==='newOrder'&&!skipInit)initOrder();
   if(name==='newClient'){tryGPS();photoDataURL=null;document.getElementById('photoPreview').style.display='none';document.getElementById('photoPlaceholder').style.display='flex';}
   if(name==='admin')renderAdmin();
   if(name==='estoque')renderEstoqueAdmin();
@@ -741,7 +741,7 @@ function openClient(id){
     document.getElementById('clientOrderHistory').innerHTML=cO.length?cO.map(o=>`<div class="oc" onclick="openOrder('${o.id}')">
       <div class="oh"><span class="on">${o.items?o.items.length:0} produto(s)</span><span class="od">${o.date}</span></div>
       <div class="oi">${TBL[o.table]||o.table} · ${o.pgto} · ${o.revendedor||''}</div>
-      <div class="of"><span class="ot">${fmt(o.total)}</span><span class="badge g">confirmado</span></div>
+      <div class="of"><span class="ot">${fmt(o.total)}</span><span class="badge ${o.status==='rascunho'?'" style="background:#f39c12">🟡 Rascunho':'g">🟢 Confirmado'}</span></div>
     </div>`).join(''):'<p style="font-size:13px;color:var(--muted)">Nenhum pedido ainda.</p>';
     nav('clientDetail');
   });
@@ -1136,9 +1136,9 @@ function editarRascunho(){
     });
     renderOrderProds();
     updateTotal();
-    // 3. Navegar para tela de pedido
+    // 3. Navegar para tela de pedido SEM zerar (skipInit=true)
     curOrderId=null;
-    nav('newOrder');
+    nav('newOrder',true,true);
     // 4. Deletar rascunho por último
     db.ref('orders/'+idParaDeletar).remove();
   });
@@ -1259,7 +1259,7 @@ function renderAdmin(){
       document.getElementById('adminOrderList').innerHTML=oArr.sort((a,b)=>b.ts-a.ts).map(o=>`<div class="oc" onclick="openOrder('${o.id}')">
         <div class="oh"><span class="on">${o.clientNome||'Avulso'}</span><span class="od">${o.date}</span></div>
         <div class="oi">👤 ${o.revendedor||'—'} · ${TBL[o.table]||o.table} · ${o.pgto}</div>
-        <div class="of"><span class="ot">${fmt(o.total)}</span><span class="badge b">${o.revendedor||'—'}</span></div>
+        <div class="of"><span class="ot">${fmt(o.total)}</span><span class="badge ${o.status==='rascunho'?'" style="background:#f39c12">🟡 Rascunho':'g">🟢 Confirmado'}</span></div>
       </div>`).join('')||'<div class="empty"><p>Nenhum pedido ainda</p></div>';
     });
   });
