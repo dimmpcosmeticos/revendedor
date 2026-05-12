@@ -896,15 +896,18 @@ function renderOrderProds(){
     return`<div class="st">${cat}</div><div class="card" style="padding:4px 14px">${
       items.map(p=>{
         const q=orderQtys[p.id]||0;
-        const stk=getEstoque(p.id);
+        const estoqueId=p.isCaixa?p.baseId:p.id;
+        const stk=getEstoque(estoqueId);
+        const maxQ=p.isCaixa?(stk===999?9999:Math.floor(stk/p.cxQtd)):(stk===999?9999:stk);
         const esgotado=stk===0;
+        const badge=stk<999?(p.isCaixa?`<span class="stk-badge">${Math.floor(stk/p.cxQtd)}cx</span>`:`<span class="stk-badge">${stk}</span>`):'';
         return`<div class="pr${esgotado?' esgotado':''}" data-n="${p.name}">
           <div class="pe" style="${prodPeStyle(p)}">${prodImg(p)}</div>
-          <div class="pi"><div class="pn">${p.name}</div><div class="pc">${fmt(getP(p,ordTable))}${stk<999?' · '+stkBadge(p.id):''}</div></div>
+          <div class="pi"><div class="pn">${p.name}</div><div class="pc">${fmt(getP(p,ordTable))}${stk<999?' · '+badge:''}</div></div>
           <div class="qc">
             <button class="qb" id="mb${p.id}" onclick="chgQty('${p.id}',-1)" ${q===0?'disabled':''}>−</button>
             <span class="qv" id="q${p.id}">${q}</span>
-            <button class="qb" id="pb${p.id}" onclick="chgQty('${p.id}',1)" ${esgotado||q>=stk?'disabled':''}>+</button>
+            <button class="qb" id="pb${p.id}" onclick="chgQty('${p.id}',1)" ${esgotado||q>=maxQ?'disabled':''}>+</button>
           </div>
         </div>`;
       }).join('')
@@ -912,8 +915,10 @@ function renderOrderProds(){
   }).join('');
 }
 function chgQty(id,d){
-  const stk=getEstoque(id);
-  const maxQ=stk===999?9999:stk;
+  const p=ALL_PRODS.find(x=>x.id===id);
+  const estoqueId=p&&p.isCaixa?p.baseId:id;
+  const stk=getEstoque(estoqueId);
+  const maxQ=p&&p.isCaixa?(stk===999?9999:Math.floor(stk/p.cxQtd)):(stk===999?9999:stk);
   orderQtys[id]=Math.max(0,Math.min(maxQ,(orderQtys[id]||0)+d));
   const q=orderQtys[id];
   const el=document.getElementById('q'+id);if(el)el.textContent=q;
