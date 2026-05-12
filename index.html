@@ -871,7 +871,7 @@ function renderOrderProds(){
         const esgotado=stk===0;
         return`<div class="pr${esgotado?' esgotado':''}" data-n="${p.name}">
           <div class="pe" style="${prodPeStyle(p)}">${prodImg(p)}</div>
-          <div class="pi"><div class="pn">${p.name}</div><div class="pc">${fmt(getP(p,ordTable))}${stk<999?' · '+stkBadge(p.id):''}</div></div>
+          <div class="pi"><div class="pn">${p.name}</div><div class="pc">${fmt(getP(p,ordTable))}${stk<999?' · '+stkBadge(p.id):''}</div>${CX[p.id]&&!esgotado?`<button onclick="addCaixa('${p.id}')" style="background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32;padding:2px 6px;border-radius:5px;font-size:10px;cursor:pointer;margin-top:2px">📦 cx${CX[p.id]}un · ${fmt(CX[p.id]*getP(p,ordTable))}</button>`:''}</div>
           <div class="qc">
             <button class="qb" id="mb${p.id}" onclick="chgQty('${p.id}',-1)" ${q===0?'disabled':''}>−</button>
             <span class="qv" id="q${p.id}">${q}</span>
@@ -881,6 +881,29 @@ function renderOrderProds(){
       }).join('')
     }</div>`;
   }).join('');
+}
+// CAIXAS DE EMBARQUE
+const CX={
+  "403":12,"417":6,"418":6,"KBE001":12,"KBE002":12,"KBE003":12,
+  "KC002":6,"KC003":12,"KC004":12,"KC009":30,"KC010":30,"KC011":30,
+  "KC012":12,"KC013":12,"KC014":12,"KC015":12,"KC016":12,
+  "KC017":6,"KC018":6,"KC019":6,"KC020":6,"KC021":6,
+  "KO001":24,"KOE001":12,"KOE002":12,"KOE003":12,"KOE007":12,
+  "KOE008":12,"KOE009":12,"KOE010":12,"KS001":12,
+  "KSH001":12,"KSH001L":12,"KSH002":12,"KSH003":12,"KSH004":12
+};
+function addCaixa(id){
+  const p=PRODS.find(x=>x.id===id);if(!p)return;
+  const qtdCx=CX[id];if(!qtdCx)return;
+  const stk=getEstoque(id);
+  const maxQ=stk===999?9999:stk;
+  const atual=orderQtys[id]||0;
+  const novo=Math.min(maxQ,atual+qtdCx);
+  orderQtys[id]=novo;
+  const el=document.getElementById('q'+id);if(el)el.textContent=novo;
+  const mb=document.getElementById('mb'+id);if(mb)mb.disabled=(novo===0);
+  const pb=document.getElementById('pb'+id);if(pb)pb.disabled=(stk!==999&&novo>=stk);
+  updateTotal();
 }
 function chgQty(id,d){
   const stk=getEstoque(id);
