@@ -409,8 +409,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div id="rascunhoBtns" style="display:none;margin-top:8px">
       <button class="btn p" onclick="confirmarPedido()" style="margin-bottom:8px">✅ Confirmar pedido</button>
       <button class="btn" onclick="editarRascunho()" style="margin-bottom:8px">✏️ Editar rascunho</button>
-      <div class="st" style="margin-top:8px">Enviar rascunho para aprovação</div>
-      <div class="rb" id="reportBoxRasc"></div>
       <button class="btn am" onclick="sendWhatsAppRasc()">💬 Enviar rascunho por WhatsApp</button>
     </div>
     <div id="orderActionBtns" style="display:none">
@@ -1022,10 +1020,6 @@ function openOrder(id){
         </div>`;
       buildReport(o,c,sub,dAmt);
       const isRascunho=o.status==='rascunho';
-      if(isRascunho){
-        const rasc=document.getElementById('reportBoxRasc');
-        if(rasc)rasc.textContent='🟡 RASCUNHO — aguardando confirmação\n\n'+document.getElementById('reportBox').textContent;
-      }
       document.getElementById('rascunhoBtns').style.display=isRascunho?'block':'none';
       document.getElementById('orderActionBtns').style.display=isRascunho?'none':'block';
       document.getElementById('adminOrderBtns').style.display=(!isRascunho&&CR==='admin')?'block':'none';
@@ -1119,39 +1113,52 @@ function editarRascunho(){
     const o=snap.val();
     if(!o||o.status!=='rascunho')return;
     const idParaDeletar=curOrderId;
-    // Restaurar estado ANTES de chamar initOrder
+    // 1. Restaurar todo o estado do pedido
     selCli=o.clientId;
     ordTable=o.table||'distribuidor';
     selPgto=o.pgto||'Dinheiro';
-    // Chamar initOrder mas depois sobrescrever os qtys
     orderQtys={};
+    (o.items||[]).forEach(function(it){orderQtys[it.id]=it.qty;});
+    // 2. Atualizar UI
     document.getElementById('discountInput').value=o.discount||0;
     document.getElementById('orderObs').value=o.obs||'';
     document.getElementById('pixInfo').style.display=selPgto==='PIX'?'flex':'none';
     document.querySelectorAll('#pgtoGrid .pb').forEach(function(b){
       const onc=b.getAttribute('onclick')||'';
-      const ativo=onc.includes("'"+selPgto+"'");
-      b.classList.toggle('active',ativo);
+      b.classList.toggle('active',onc.includes("'"+selPgto+"'"));
     });
     updateCliSel();
+    const sel=document.getElementById('orderClient');
+    if(sel)sel.value=selCli||'';
     document.querySelectorAll('#orderTabs .pt-tab').forEach(function(b){
       const t=b.textContent.trim().toLowerCase();
       b.classList.toggle('active',ordTable==='distribuidor'?t.startsWith('dist'):ordTable==='atacado'?t.startsWith('var'):t.startsWith('con'));
     });
-    // Restaurar quantidades dos itens
-    (o.items||[]).forEach(function(it){orderQtys[it.id]=it.qty;});
-    renderOrderProds();updateTotal();
-    // Deletar rascunho e ir para tela de edição
-    db.ref('orders/'+idParaDeletar).remove().then(function(){
-      curOrderId=null;
-      nav('newOrder');
-    });
+    renderOrderProds();
+    updateTotal();
+    // 3. Navegar para tela de pedido
+    curOrderId=null;
+    nav('newOrder');
+    // 4. Deletar rascunho por último
+    db.ref('orders/'+idParaDeletar).remove();
   });
 }
 function sendWhatsAppRasc(){
-  const txt=document.getElementById('reportBoxRasc')?.textContent||'';
-  if(!txt)return;
-  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+  db.ref('orders/'+curOrderId).once('value',function(os){
+    const o=os.val();if(!o)return;
+    db.ref('clients/'+o.clientId).once('value',function(cs){
+      const c=cs.val();let sub=0;(o.items||[]).forEach(function(it){sub+=it.qty*it.price;});
+      let msg='*🟡 RASCUNHO DIMMP COSMÉTICOS*\nCliente: '+(c?c.nome:'Avulso')+'\nData: '+o.date+' | '+TBL[o.table]+'\n\n*Produtos:*\n';
+      (o.items||[]).forEach(function(it){msg+='• '+it.name+' x'+it.qty+' = '+fmt(it.qty*it.price)+'\n';});
+      msg+='\nSubtotal: '+fmt(sub);
+      if(o.discount>0)msg+='\nDesconto: -'+fmt(sub*o.discount/100)+' ('+o.discount+'%)';
+      msg+='\n*Total: '+fmt(o.total)+'*\nPagamento: '+o.pgto;
+      if(o.pgto==='PIX')msg+='\nPIX: CNPJ 43.287.807/0001-60 ou financeiro@dimmpcosmeticos.com.br';
+      if(o.obs)msg+='\nObs: '+o.obs;
+      msg+='\n\n_Rascunho — aguardando sua confirmação_';
+      window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    });
+  });
 }
 function deleteOrder(){
   if(CR!=='admin'||!curOrderId)return;
