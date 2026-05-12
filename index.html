@@ -322,6 +322,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
       <button class="btn" onclick="editClient()">✏️ Editar cliente</button>
     </div>
     <div id="clientEditBtns" style="display:none">
+      <button class="btn" onclick="exportClientCSV()" style="margin-bottom:8px">⬇️ Exportar CSV cliente</button>
       <button class="btn rd" onclick="deleteClient()">🗑️ Excluir cliente</button>
     </div>
     <div class="st" style="margin-top:16px">Histórico de pedidos</div>
@@ -405,12 +406,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
   <!-- DETALHE PEDIDO -->
   <div class="screen" id="screen-orderDetail">
     <div id="orderDetailContent"></div>
-    <div class="st" style="margin-top:16px">Relatório para o Munin</div>
-    <div class="rb" id="reportBox"></div>
-    <button class="btn p" onclick="generatePDF()">📄 Gerar PDF para cliente</button>
-    <button class="btn" onclick="copyReport()">📋 Copiar relatório</button>
-    <button class="btn" onclick="downloadCSV()">⬇️ Baixar CSV</button>
-    <button class="btn am" onclick="sendWhatsApp()">💬 Enviar por WhatsApp</button>
+    <div id="rascunhoBtns" style="display:none;margin-top:8px">
+      <button class="btn p" onclick="confirmarPedido()" style="margin-bottom:8px">✅ Confirmar pedido</button>
+      <button class="btn" onclick="editarRascunho()">✏️ Editar rascunho</button>
+    </div>
+    <div id="orderActionBtns" style="display:none">
+      <div class="st" style="margin-top:16px">Relatório para o Munin</div>
+      <div class="rb" id="reportBox"></div>
+      <button class="btn p" onclick="generatePDF()">📄 Gerar PDF para cliente</button>
+      <button class="btn" onclick="copyReport()">📋 Copiar relatório</button>
+      <button class="btn" onclick="downloadCSV()">⬇️ Baixar CSV</button>
+      <button class="btn am" onclick="sendWhatsApp()">💬 Enviar por WhatsApp</button>
+    </div>
     <div id="adminOrderBtns" style="display:none;margin-top:4px">
       <button class="btn rd" onclick="deleteOrder()">🗑️ Cancelar pedido</button>
     </div>
@@ -785,6 +792,40 @@ function saveEditClient(){
     openClient(curCli.id);
   });
 }
+function exportClientCSV(){
+  if(!curCli)return;
+  const c=curCli;
+  const rows=[
+    ['Campo','Valor'],
+    ['Perfil','Cliente'],
+    ['Pessoa',c.pessoa||'Jurídica'],
+    ['Nome Fantasia',c.nome||''],
+    ['Nome/Razão Social',c.razao||c.nome||''],
+    ['CPF/CNPJ',c.doc||''],
+    ['Responsável',c.resp||''],
+    ['(ddd)Celular',c.tel||''],
+    ['E-mail',c.email||''],
+    ['Endereço',(c.end||'')+(c.num?' nº '+c.num:'')],
+    ['Bairro',c.bairro||''],
+    ['Município',c.cidade||''],
+    ['Estado',c.estado||'SP'],
+    ['Tabela',TBL[c.tipo]||c.tipo||''],
+    ['GPS Lat',c.lat?c.lat.toFixed(6):''],
+    ['GPS Lng',c.lng?c.lng.toFixed(6):''],
+    ['Cidade GPS',c.cidade_gps||''],
+    ['Cadastrado por',c.revendedor||''],
+    ['Cadastrado em',c.criadoEm||''],
+    ['Observações',c.obs||''],
+  ];
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='cliente_'+(c.nome||c.id).replace(/[^a-z0-9]/gi,'_')+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
 function deleteClient(){
   if(CR!=='admin'||!curCli)return;
   if(!confirm('Excluir cliente '+curCli.nome+'?'))return;
@@ -934,12 +975,9 @@ function updateTotal(){
 }
 function finalizeOrder(){
   const items=ALL_PRODS.filter(p=>(orderQtys[p.id]||0)>0).map(p=>{
-    const estoqueId=p.isCaixa?p.baseId:p.id;
-    const unidades=(orderQtys[p.id]||0)*(p.isCaixa?p.cxQtd:1);
-    const stk=getEstoque(estoqueId);
-    if(stk!==999&&stk<unidades){alert('Estoque insuficiente: '+p.name+' (disponível: '+stk+')');return null;}
     return{id:p.id,baseId:p.baseId||p.id,name:p.name,e:p.e,qty:orderQtys[p.id],
-      unidades:unidades,isCaixa:p.isCaixa||false,cxQtd:p.cxQtd||1,price:getP(p,ordTable)};
+      unidades:(orderQtys[p.id]||0)*(p.isCaixa?p.cxQtd:1),
+      isCaixa:p.isCaixa||false,cxQtd:p.cxQtd||1,price:getP(p,ordTable)};
   }).filter(Boolean);
   if(!items.length){alert('Adicione pelo menos 1 produto.');return;}
   if(!selCli){alert('Selecione um cliente.');return;}
@@ -947,17 +985,10 @@ function finalizeOrder(){
   let sub=0;items.forEach(it=>{sub+=it.qty*it.price;});
   const total=Math.round((sub*(1-d/100))*100)/100;
   const id='o_'+ts();
-  // Atualiza estoque
-  const updates={};
-  items.forEach(it=>{
-    const estoqueId=it.baseId;
-    const cur=getEstoque(estoqueId);
-    if(cur!==999)updates['estoque/'+estoqueId]=Math.max(0,cur-it.unidades);
-  });
-  updates['orders/'+id]={id,clientId:selCli,clientNome:clients[selCli]?.nome||'',
+  const order={id,clientId:selCli,clientNome:clients[selCli]?.nome||'',
     date:today(),ts:ts(),table:ordTable,items,discount:d,pgto:selPgto,
-    obs:document.getElementById('orderObs').value,total,revendedor:CU};
-  db.ref().update(updates).then(()=>{selCli=null;openOrder(id);});
+    obs:document.getElementById('orderObs').value,total,revendedor:CU,status:'rascunho'};
+  db.ref('orders/'+id).set(order).then(()=>{selCli=null;openOrder(id);});
 }
 
 // ORDER DETAIL
@@ -987,7 +1018,10 @@ function openOrder(id){
           ${o.obs?`<div style="margin-top:8px;font-size:12px;color:var(--muted)">${o.obs}</div>`:''}
         </div>`;
       buildReport(o,c,sub,dAmt);
-      document.getElementById('adminOrderBtns').style.display=CR==='admin'?'block':'none';
+      const isRascunho=o.status==='rascunho';
+      document.getElementById('rascunhoBtns').style.display=isRascunho?'block':'none';
+      document.getElementById('orderActionBtns').style.display=isRascunho?'none':'block';
+      document.getElementById('adminOrderBtns').style.display=(!isRascunho&&CR==='admin')?'block':'none';
     });
   });
   nav('orderDetail');
@@ -1042,13 +1076,62 @@ function renderOrders(){
   const el=document.getElementById('orderList');
   const arr=Object.values(orders).sort((a,b)=>b.ts-a.ts);
   if(!arr.length){el.innerHTML='<div class="empty"><div class="ei">🧾</div><p>Nenhum pedido ainda</p></div>';return;}
-  el.innerHTML=arr.map(o=>`<div class="oc" onclick="openOrder('${o.id}')">
+  el.innerHTML=arr.map(o=>{
+    const isRasc=o.status==='rascunho';
+    const badge=isRasc?'<span class="badge" style="background:#f39c12">🟡 Rascunho</span>':'<span class="badge g">🟢 Confirmado</span>';
+    return`<div class="oc" onclick="openOrder('${o.id}')">
     <div class="oh"><span class="on">${o.clientNome||'Avulso'}</span><span class="od">${o.date}</span></div>
     <div class="oi">${o.items?o.items.length:0} item(s) · ${TBL[o.table]||o.table} · ${o.pgto}</div>
-    <div class="of"><span class="ot">${fmt(o.total)}</span><span class="badge g">confirmado</span></div>
-  </div>`).join('');
+    <div class="of"><span class="ot">${fmt(o.total)}</span>${badge}</div>
+  </div>`;}).join('');
 }
 
+function confirmarPedido(){
+  if(!curOrderId)return;
+  db.ref('orders/'+curOrderId).once('value').then(function(snap){
+    const o=snap.val();
+    if(!o||o.status!=='rascunho')return;
+    // Verificar e abater estoque
+    const updates={};
+    let ok=true;
+    (o.items||[]).forEach(function(it){
+      const estoqueId=it.baseId||it.id;
+      const unidades=it.unidades||(it.isCaixa?(it.qty||1)*(it.cxQtd||1):(it.qty||1));
+      const cur=getEstoque(estoqueId);
+      if(cur!==999&&cur<unidades){alert('Estoque insuficiente: '+it.name+' (disponível: '+cur+')');ok=false;}
+      else if(cur!==999)updates['estoque/'+estoqueId]=Math.max(0,cur-unidades);
+    });
+    if(!ok)return;
+    updates['orders/'+curOrderId+'/status']='confirmado';
+    db.ref().update(updates).then(function(){openOrder(curOrderId);});
+  });
+}
+function editarRascunho(){
+  if(!curOrderId)return;
+  db.ref('orders/'+curOrderId).once('value').then(function(snap){
+    const o=snap.val();
+    if(!o||o.status!=='rascunho')return;
+    // Preencher tela de pedido com dados do rascunho
+    selCli=o.clientId;
+    ordTable=o.table||'distribuidor';
+    initOrder();
+    // Restaurar quantidades
+    (o.items||[]).forEach(function(it){orderQtys[it.id]=it.qty;});
+    // Restaurar desconto, obs, pgto
+    document.getElementById('discountInput').value=o.discount||0;
+    document.getElementById('orderObs').value=o.obs||'';
+    selPgto=o.pgto||'Dinheiro';
+    document.querySelectorAll('#pgtoGrid .pb').forEach(function(b){
+      b.classList.toggle('active',b.textContent.trim()===selPgto||b.getAttribute('onclick').includes("'"+selPgto+"'"));
+    });
+    // Deletar rascunho antigo e ir para tela de edição
+    db.ref('orders/'+curOrderId).remove().then(function(){
+      curOrderId=null;
+      renderOrderProds();updateTotal();
+      nav('newOrder');
+    });
+  });
+}
 function deleteOrder(){
   if(CR!=='admin'||!curOrderId)return;
   if(!confirm('Cancelar este pedido e devolver estoque?'))return;
