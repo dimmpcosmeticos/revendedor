@@ -526,6 +526,21 @@ const PRODS=[
   {id:"472",cat:"Eau de Parfum Fem.",name:"Kallah EDP 100ml",e:"🌸",dist:100.00,atac:130.00,var:189.90},
 ];
 
+// Produtos-caixa gerados automaticamente
+const CX_PRODS=Object.keys(CX).map(function(id){
+  const p=PRODS.find(function(x){return x.id===id;});
+  if(!p)return null;
+  const qtd=CX[id];
+  return{id:id+'_cx',baseId:id,cat:p.cat,name:p.name+' (Cx'+qtd+'un)',
+    e:p.e,img:p.img||null,
+    dist:Math.round(p.dist*qtd*100)/100,
+    atac:Math.round(p.atac*qtd*100)/100,
+    var:Math.round(p.var*qtd*100)/100,
+    cxQtd:qtd,isCaixa:true};
+}).filter(Boolean);
+
+const ALL_PRODS=PRODS.concat(CX_PRODS);
+
 // STATE
 let CU=null,CR='revendedor',clients={},orders={},estoque={},comissoes={};
 let catTable='distribuidor',ordTable='distribuidor';
@@ -542,7 +557,11 @@ function ini(n){return n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase
 function today(){return new Date().toLocaleDateString('pt-BR');}
 function monthKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');}
 function ts(){return Date.now();}
-function getEstoque(id){return estoque[id]===undefined?999:estoque[id];}
+function getEstoque(id){
+  // Para produtos-caixa, verificar estoque do produto base
+  if(id.endsWith('_cx')){const baseId=id.replace('_cx','');return estoque[baseId]===undefined?999:estoque[baseId];}
+  return estoque[id]===undefined?999:estoque[id];
+}
 
 // LOGIN
 function doLogin(role){
@@ -861,9 +880,9 @@ function initOrder(){
 }
 function renderOrderProds(){
   const el=document.getElementById('orderProductList');
-  const cats=[...new Set(PRODS.map(p=>p.cat))];
+  const cats=[...new Set(ALL_PRODS.map(p=>p.cat))];
   el.innerHTML=cats.map(cat=>{
-    const items=PRODS.filter(p=>p.cat===cat);
+    const items=ALL_PRODS.filter(p=>p.cat===cat);
     return`<div class="st">${cat}</div><div class="card" style="padding:4px 14px">${
       items.map(p=>{
         const q=orderQtys[p.id]||0;
@@ -871,7 +890,7 @@ function renderOrderProds(){
         const esgotado=stk===0;
         return`<div class="pr${esgotado?' esgotado':''}" data-n="${p.name}">
           <div class="pe" style="${prodPeStyle(p)}">${prodImg(p)}</div>
-          <div class="pi"><div class="pn">${p.name}</div><div class="pc">${fmt(getP(p,ordTable))}${stk<999?' · '+stkBadge(p.id):''}</div>${CX[p.id]&&!esgotado?`<button onclick="addCaixa('${p.id}')" style="background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32;padding:2px 6px;border-radius:5px;font-size:10px;cursor:pointer;margin-top:2px">📦 cx${CX[p.id]}un · ${fmt(CX[p.id]*getP(p,ordTable))}</button>`:''}</div>
+          <div class="pi"><div class="pn">${p.name}</div><div class="pc">${fmt(getP(p,ordTable))}${stk<999?' · '+stkBadge(p.id):''}</div></div>
           <div class="qc">
             <button class="qb" id="mb${p.id}" onclick="chgQty('${p.id}',-1)" ${q===0?'disabled':''}>−</button>
             <span class="qv" id="q${p.id}">${q}</span>
@@ -892,19 +911,6 @@ const CX={
   "KOE008":12,"KOE009":12,"KOE010":12,"KS001":12,
   "KSH001":12,"KSH001L":12,"KSH002":12,"KSH003":12,"KSH004":12
 };
-function addCaixa(id){
-  const p=PRODS.find(x=>x.id===id);if(!p)return;
-  const qtdCx=CX[id];if(!qtdCx)return;
-  const stk=getEstoque(id);
-  const maxQ=stk===999?9999:stk;
-  const atual=orderQtys[id]||0;
-  const novo=Math.min(maxQ,atual+qtdCx);
-  orderQtys[id]=novo;
-  const el=document.getElementById('q'+id);if(el)el.textContent=novo;
-  const mb=document.getElementById('mb'+id);if(mb)mb.disabled=(novo===0);
-  const pb=document.getElementById('pb'+id);if(pb)pb.disabled=(stk!==999&&novo>=stk);
-  updateTotal();
-}
 function chgQty(id,d){
   const stk=getEstoque(id);
   const maxQ=stk===999?9999:stk;
@@ -917,17 +923,20 @@ function chgQty(id,d){
 }
 function setPgto(btn,name){selPgto=name;document.querySelectorAll('#pgtoGrid .pb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('pixInfo').style.display=name==='PIX'?'flex':'none';}
 function updateTotal(){
-  let sub=0;PRODS.forEach(p=>{sub+=(orderQtys[p.id]||0)*getP(p,ordTable);});
+  let sub=0;ALL_PRODS.forEach(p=>{sub+=(orderQtys[p.id]||0)*getP(p,ordTable);});
   const d=Math.min(40,Math.max(0,parseFloat(document.getElementById('discountInput').value)||0));
   document.getElementById('summSub').textContent=fmt(sub);
   document.getElementById('summDisc').textContent='- '+fmt(sub*d/100);
   document.getElementById('summTot').textContent=fmt(sub*(1-d/100));
 }
 function finalizeOrder(){
-  const items=PRODS.filter(p=>(orderQtys[p.id]||0)>0).map(p=>{
-    const stk=getEstoque(p.id);
-    if(stk<orderQtys[p.id]){alert('Estoque insuficiente: '+p.name+' (disponível: '+stk+')');return null;}
-    return{id:p.id,name:p.name,e:p.e,qty:orderQtys[p.id],price:getP(p,ordTable)};
+  const items=ALL_PRODS.filter(p=>(orderQtys[p.id]||0)>0).map(p=>{
+    const estoqueId=p.isCaixa?p.baseId:p.id;
+    const unidades=(orderQtys[p.id]||0)*(p.isCaixa?p.cxQtd:1);
+    const stk=getEstoque(estoqueId);
+    if(stk!==999&&stk<unidades){alert('Estoque insuficiente: '+p.name+' (disponível: '+stk+')');return null;}
+    return{id:p.id,baseId:p.baseId||p.id,name:p.name,e:p.e,qty:orderQtys[p.id],
+      unidades:unidades,isCaixa:p.isCaixa||false,cxQtd:p.cxQtd||1,price:getP(p,ordTable)};
   }).filter(Boolean);
   if(!items.length){alert('Adicione pelo menos 1 produto.');return;}
   if(!selCli){alert('Selecione um cliente.');return;}
@@ -938,8 +947,9 @@ function finalizeOrder(){
   // Atualiza estoque
   const updates={};
   items.forEach(it=>{
-    const cur=getEstoque(it.id);
-    if(cur!==999)updates['estoque/'+it.id]=Math.max(0,cur-it.qty);
+    const estoqueId=it.baseId;
+    const cur=getEstoque(estoqueId);
+    if(cur!==999)updates['estoque/'+estoqueId]=Math.max(0,cur-it.unidades);
   });
   updates['orders/'+id]={id,clientId:selCli,clientNome:clients[selCli]?.nome||'',
     date:today(),ts:ts(),table:ordTable,items,discount:d,pgto:selPgto,
@@ -1038,8 +1048,22 @@ function renderOrders(){
 
 function deleteOrder(){
   if(CR!=='admin'||!curOrderId)return;
-  if(!confirm('Cancelar este pedido?'))return;
-  db.ref('orders/'+curOrderId).remove().then(()=>nav('orders'));
+  if(!confirm('Cancelar este pedido e devolver estoque?'))return;
+  db.ref('orders/'+curOrderId).once('value').then(function(snap){
+    const o=snap.val();
+    if(!o){db.ref('orders/'+curOrderId).remove().then(()=>nav('orders'));return;}
+    const items=o.items||[];
+    const updates={};
+    items.forEach(function(item){
+      const estoqueId=item.baseId||item.id.replace('_cx','').replace(/_cx$/,'');
+      const unidades=item.unidades||(item.isCaixa?(item.qty||1)*(item.cxQtd||1):(item.qty||1));
+      const cur=getEstoque(estoqueId);
+      if(cur!==999)updates['estoque/'+estoqueId]=cur+unidades;
+    });
+    const finish=function(){db.ref('orders/'+curOrderId).remove().then(()=>nav('orders'));};
+    if(Object.keys(updates).length>0){db.ref().update(updates).then(finish);}
+    else{finish();}
+  });
 }
 
 // ESTOQUE ADMIN
