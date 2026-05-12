@@ -559,7 +559,7 @@ const ALL_PRODS=PRODS.concat(CX_PRODS);
 // STATE
 let CU=null,CR='revendedor',clients={},orders={},estoque={},comissoes={};
 let catTable='distribuidor',ordTable='distribuidor';
-let orderQtys={},selPgto='Dinheiro',selCli=null,curCli=null;
+let orderQtys={},selPgto='Dinheiro',selCli=null,curCli=null,editandoRascunhoId=null;
 let navStack=[],curOrderId=null;
 let gpsLat=-20.274,gpsLng=-50.536,gpsCity='';
 let photoDataURL=null;
@@ -918,7 +918,7 @@ function updateCliSel(){
   if(prev)sel.value=prev;
 }
 function initOrder(){
-  orderQtys={};selPgto='Dinheiro';
+  orderQtys={};selPgto='Dinheiro';editandoRascunhoId=null;
   document.getElementById('discountInput').value=0;
   document.getElementById('orderObs').value='';
   document.getElementById('pixInfo').style.display='none';
@@ -985,7 +985,8 @@ function finalizeOrder(){
   const d=Math.min(40,parseFloat(document.getElementById('discountInput').value)||0);
   let sub=0;items.forEach(it=>{sub+=it.qty*it.price;});
   const total=Math.round((sub*(1-d/100))*100)/100;
-  const id='o_'+ts();
+  const id=editandoRascunhoId||('o_'+ts());
+  editandoRascunhoId=null;
   const order={id,clientId:selCli,clientNome:clients[selCli]?.nome||'',
     date:today(),ts:ts(),table:ordTable,items,discount:d,pgto:selPgto,
     obs:document.getElementById('orderObs').value,total,revendedor:CU,status:'rascunho'};
@@ -1112,20 +1113,20 @@ function editarRascunho(){
   db.ref('orders/'+curOrderId).once('value').then(function(snap){
     const o=snap.val();
     if(!o||o.status!=='rascunho')return;
-    const idParaDeletar=curOrderId;
-    // 1. Restaurar todo o estado do pedido
+    // Guardar ID para sobrescrever ao salvar
+    editandoRascunhoId=curOrderId;
+    // Restaurar estado
     selCli=o.clientId;
     ordTable=o.table||'distribuidor';
     selPgto=o.pgto||'Dinheiro';
     orderQtys={};
     (o.items||[]).forEach(function(it){orderQtys[it.id]=it.qty;});
-    // 2. Atualizar UI
+    // Atualizar UI
     document.getElementById('discountInput').value=o.discount||0;
     document.getElementById('orderObs').value=o.obs||'';
     document.getElementById('pixInfo').style.display=selPgto==='PIX'?'flex':'none';
     document.querySelectorAll('#pgtoGrid .pb').forEach(function(b){
-      const onc=b.getAttribute('onclick')||'';
-      b.classList.toggle('active',onc.includes("'"+selPgto+"'"));
+      b.classList.toggle('active',(b.getAttribute('onclick')||'').includes("'"+selPgto+"'"));
     });
     updateCliSel();
     const sel=document.getElementById('orderClient');
@@ -1136,11 +1137,8 @@ function editarRascunho(){
     });
     renderOrderProds();
     updateTotal();
-    // 3. Navegar para tela de pedido SEM zerar (skipInit=true)
     curOrderId=null;
     nav('newOrder',true,true);
-    // 4. Deletar rascunho por último
-    db.ref('orders/'+idParaDeletar).remove();
   });
 }
 function sendWhatsAppRasc(){
