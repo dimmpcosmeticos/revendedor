@@ -467,6 +467,16 @@ firebase.initializeApp({
 const db=firebase.database();
 const storage=firebase.storage();
 
+// CAIXAS DE EMBARQUE
+const CX={
+  "403":12,"417":6,"418":6,"KBE001":12,"KBE002":12,"KBE003":12,
+  "KC002":6,"KC003":12,"KC004":12,"KC009":30,"KC010":30,"KC011":30,
+  "KC012":12,"KC013":12,"KC014":12,"KC015":12,"KC016":12,
+  "KC017":6,"KC018":6,"KC019":6,"KC020":6,"KC021":6,
+  "KO001":24,"KOE001":12,"KOE002":12,"KOE003":12,"KOE007":12,
+  "KOE008":12,"KOE009":12,"KOE010":12,"KS001":12,
+  "KSH001":12,"KSH001L":12,"KSH002":12,"KSH003":12,"KSH004":12
+};
 const PRODS=[
   {id:"263",cat:"Pó Descolorante",name:"Pó Descolorante Koncentre MVN Azul",e:"🪄",dist:25.90,atac:33.90,var:33.90},
   {id:"265a",cat:"Pó Descolorante",name:"Pó Descolorante White New Acabado",e:"🪄",dist:25.90,atac:33.90,var:40.00},
@@ -901,16 +911,6 @@ function renderOrderProds(){
     }</div>`;
   }).join('');
 }
-// CAIXAS DE EMBARQUE
-const CX={
-  "403":12,"417":6,"418":6,"KBE001":12,"KBE002":12,"KBE003":12,
-  "KC002":6,"KC003":12,"KC004":12,"KC009":30,"KC010":30,"KC011":30,
-  "KC012":12,"KC013":12,"KC014":12,"KC015":12,"KC016":12,
-  "KC017":6,"KC018":6,"KC019":6,"KC020":6,"KC021":6,
-  "KO001":24,"KOE001":12,"KOE002":12,"KOE003":12,"KOE007":12,
-  "KOE008":12,"KOE009":12,"KOE010":12,"KS001":12,
-  "KSH001":12,"KSH001L":12,"KSH002":12,"KSH003":12,"KSH004":12
-};
 function chgQty(id,d){
   const stk=getEstoque(id);
   const maxQ=stk===999?9999:stk;
