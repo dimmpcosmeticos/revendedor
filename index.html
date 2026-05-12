@@ -408,7 +408,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
     <div id="orderDetailContent"></div>
     <div id="rascunhoBtns" style="display:none;margin-top:8px">
       <button class="btn p" onclick="confirmarPedido()" style="margin-bottom:8px">✅ Confirmar pedido</button>
-      <button class="btn" onclick="editarRascunho()">✏️ Editar rascunho</button>
+      <button class="btn" onclick="editarRascunho()" style="margin-bottom:8px">✏️ Editar rascunho</button>
+      <div class="st" style="margin-top:8px">Enviar rascunho para aprovação</div>
+      <div class="rb" id="reportBoxRasc"></div>
+      <button class="btn am" onclick="sendWhatsAppRasc()">💬 Enviar rascunho por WhatsApp</button>
     </div>
     <div id="orderActionBtns" style="display:none">
       <div class="st" style="margin-top:16px">Relatório para o Munin</div>
@@ -1019,6 +1022,10 @@ function openOrder(id){
         </div>`;
       buildReport(o,c,sub,dAmt);
       const isRascunho=o.status==='rascunho';
+      if(isRascunho){
+        const rasc=document.getElementById('reportBoxRasc');
+        if(rasc)rasc.textContent='🟡 RASCUNHO — aguardando confirmação\n\n'+document.getElementById('reportBox').textContent;
+      }
       document.getElementById('rascunhoBtns').style.display=isRascunho?'block':'none';
       document.getElementById('orderActionBtns').style.display=isRascunho?'none':'block';
       document.getElementById('adminOrderBtns').style.display=(!isRascunho&&CR==='admin')?'block':'none';
@@ -1111,26 +1118,40 @@ function editarRascunho(){
   db.ref('orders/'+curOrderId).once('value').then(function(snap){
     const o=snap.val();
     if(!o||o.status!=='rascunho')return;
-    // Preencher tela de pedido com dados do rascunho
+    const idParaDeletar=curOrderId;
+    // Restaurar estado ANTES de chamar initOrder
     selCli=o.clientId;
     ordTable=o.table||'distribuidor';
-    initOrder();
-    // Restaurar quantidades
-    (o.items||[]).forEach(function(it){orderQtys[it.id]=it.qty;});
-    // Restaurar desconto, obs, pgto
+    selPgto=o.pgto||'Dinheiro';
+    // Chamar initOrder mas depois sobrescrever os qtys
+    orderQtys={};
     document.getElementById('discountInput').value=o.discount||0;
     document.getElementById('orderObs').value=o.obs||'';
-    selPgto=o.pgto||'Dinheiro';
+    document.getElementById('pixInfo').style.display=selPgto==='PIX'?'flex':'none';
     document.querySelectorAll('#pgtoGrid .pb').forEach(function(b){
-      b.classList.toggle('active',b.textContent.trim()===selPgto||b.getAttribute('onclick').includes("'"+selPgto+"'"));
+      const onc=b.getAttribute('onclick')||'';
+      const ativo=onc.includes("'"+selPgto+"'");
+      b.classList.toggle('active',ativo);
     });
-    // Deletar rascunho antigo e ir para tela de edição
-    db.ref('orders/'+curOrderId).remove().then(function(){
+    updateCliSel();
+    document.querySelectorAll('#orderTabs .pt-tab').forEach(function(b){
+      const t=b.textContent.trim().toLowerCase();
+      b.classList.toggle('active',ordTable==='distribuidor'?t.startsWith('dist'):ordTable==='atacado'?t.startsWith('var'):t.startsWith('con'));
+    });
+    // Restaurar quantidades dos itens
+    (o.items||[]).forEach(function(it){orderQtys[it.id]=it.qty;});
+    renderOrderProds();updateTotal();
+    // Deletar rascunho e ir para tela de edição
+    db.ref('orders/'+idParaDeletar).remove().then(function(){
       curOrderId=null;
-      renderOrderProds();updateTotal();
       nav('newOrder');
     });
   });
+}
+function sendWhatsAppRasc(){
+  const txt=document.getElementById('reportBoxRasc')?.textContent||'';
+  if(!txt)return;
+  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
 }
 function deleteOrder(){
   if(CR!=='admin'||!curOrderId)return;
